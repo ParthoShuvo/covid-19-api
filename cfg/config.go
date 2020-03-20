@@ -42,14 +42,14 @@ func (c *Config) AppName() string {
 }
 
 func loadConfig() (*configData, error) {
-	data, err := ioutil.ReadFile(configFilePath)
+	jsonData, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
 		fmt.Println("failed to read file", configFilePath, err)
 		return nil, err
 	}
 
 	var configData configData
-	if err := json.Unmarshal(data, &configData); err != nil {
+	if err := json.Unmarshal(jsonData, &configData); err != nil {
 		fmt.Println("failed to parse json")
 		return nil, err
 	}
