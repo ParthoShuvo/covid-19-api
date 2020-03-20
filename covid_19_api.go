@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.io/covid-19-api/cfg"
+)
 
 func main() {
-	fmt.Println(version)
+	config := cfg.NewConfig(version)
+	fmt.Println(config.AppName(), "starts")
 }

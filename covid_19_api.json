@@ -1,3 +1,8 @@
 {
-    "Description": "Configuration for covid-19-api"
+    "Description": "Configuration for covid-19-api",
+    "Name": "covid-19-api",
+    "Server": {
+        "Bind": "shuvojit.ibfd.org",
+        "Port": 9000
+    }
 }
