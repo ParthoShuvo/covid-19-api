@@ -12,11 +12,11 @@ const configFilePath = "covid_19_api.json"
 type configData struct {
 	Description string
 	Name        string
-	Server      *serverDef
+	Server      *ServerDef
 }
 
-// serverDef defines a server address and port.
-type serverDef struct {
+// ServerDef defines a server address and port.
+type ServerDef struct {
 	Bind string
 	Port int
 }
@@ -54,4 +54,13 @@ func loadConfig() (*configData, error) {
 		return nil, err
 	}
 	return &configData, nil
+}
+
+// Server returns the address and port to use for this service
+func (c *Config) Server() *ServerDef {
+	return c.configData.Server
+}
+
+func (s *ServerDef) String() string {
+	return fmt.Sprintf("%s:%d", s.Bind, s.Port)
 }
