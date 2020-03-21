@@ -13,6 +13,7 @@ type configData struct {
 	Description string
 	Name        string
 	Server      *ServerDef
+	Logging     *LogDef
 }
 
 // ServerDef defines a server address and port.
@@ -21,12 +22,19 @@ type ServerDef struct {
 	Port int
 }
 
+// LogDef defines logging
+type LogDef struct {
+	Filename string
+	Level    string
+}
+
 // Config holds configuration data.
 type Config struct {
 	configData *configData
 	appName    string
 }
 
+// NewConfig creates application configuration
 func NewConfig(version string) *Config {
 	cd, _ := loadConfig()
 	an := cd.appName(version)
@@ -37,6 +45,7 @@ func (cd *configData) appName(version string) string {
 	return fmt.Sprintf("%s/%s", cd.Name, version)
 }
 
+// AppName returns application name
 func (c *Config) AppName() string {
 	return c.appName
 }
@@ -63,4 +72,9 @@ func (c *Config) Server() *ServerDef {
 
 func (s *ServerDef) String() string {
 	return fmt.Sprintf("%s:%d", s.Bind, s.Port)
+}
+
+// Logging returns logfile and log level
+func (c *Config) Logging() LogDef {
+	return *c.configData.Logging
 }
