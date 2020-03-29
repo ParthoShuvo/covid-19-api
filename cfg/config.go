@@ -12,8 +12,10 @@ const configFilePath = "covid_19_api.json"
 type configData struct {
 	Description string
 	Name        string
+	AllowCORS   bool
 	Server      *ServerDef
 	Logging     *LogDef
+	Db          *DbDef `json:"Dataset"`
 }
 
 // ServerDef defines a server address and port.
@@ -26,6 +28,32 @@ type ServerDef struct {
 type LogDef struct {
 	Filename string
 	Level    string
+}
+
+// DbDef database definition
+type DbDef struct {
+	CountryInfo   *DataDef
+	ArchievedData *DatasetDef
+	CSSE          *DatasetDef
+}
+
+// DatasetDef dataset definition
+type DatasetDef struct {
+	DailyReports *DataDef
+	TimeSeries   *TimeSeriesDataDef
+}
+
+// TimeSeriesDataDef defines confirmed, deaths, and recovered data definitions
+type TimeSeriesDataDef struct {
+	Confirmed *DataDef
+	Deaths    *DataDef
+	Recovered *DataDef
+}
+
+// DataDef defines a file data-type and path
+type DataDef struct {
+	Filetype string
+	Filepath string
 }
 
 // Config holds configuration data.
@@ -48,6 +76,16 @@ func (cd *configData) appName(version string) string {
 // AppName returns application name
 func (c *Config) AppName() string {
 	return c.appName
+}
+
+// AllowCORS determines whether cross origin calls are allowed.
+func (c *Config) AllowCORS() bool {
+	return c.configData.AllowCORS
+}
+
+// Database returns database definition
+func (c *Config) Database() *DbDef {
+	return c.configData.Db
 }
 
 func loadConfig() (*configData, error) {
