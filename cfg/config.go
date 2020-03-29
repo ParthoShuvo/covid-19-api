@@ -8,6 +8,12 @@ import (
 
 const configFilePath = "covid_19_api.json"
 
+// Config holds configuration data.
+type Config struct {
+	configData *configData
+	appName    string
+}
+
 // configData defines the COVID-19-API configuration
 type configData struct {
 	Description string
@@ -56,17 +62,26 @@ type DataDef struct {
 	Filepath string
 }
 
-// Config holds configuration data.
-type Config struct {
-	configData *configData
-	appName    string
-}
-
 // NewConfig creates application configuration
 func NewConfig(version string) *Config {
 	cd, _ := loadConfig()
 	an := cd.appName(version)
 	return &Config{cd, an}
+}
+
+func loadConfig() (*configData, error) {
+	jsonData, err := ioutil.ReadFile(configFilePath)
+	if err != nil {
+		fmt.Println("failed to read file", configFilePath, err)
+		return nil, err
+	}
+
+	var configData configData
+	if err := json.Unmarshal(jsonData, &configData); err != nil {
+		fmt.Println("failed to parse json")
+		return nil, err
+	}
+	return &configData, nil
 }
 
 func (cd *configData) appName(version string) string {
@@ -86,21 +101,6 @@ func (c *Config) AllowCORS() bool {
 // Database returns database definition
 func (c *Config) Database() *DbDef {
 	return c.configData.Db
-}
-
-func loadConfig() (*configData, error) {
-	jsonData, err := ioutil.ReadFile(configFilePath)
-	if err != nil {
-		fmt.Println("failed to read file", configFilePath, err)
-		return nil, err
-	}
-
-	var configData configData
-	if err := json.Unmarshal(jsonData, &configData); err != nil {
-		fmt.Println("failed to parse json")
-		return nil, err
-	}
-	return &configData, nil
 }
 
 // Server returns the address and port to use for this service
