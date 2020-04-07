@@ -11,9 +11,15 @@
         "Level": "DEBUG"
     },
     "Dataset": {
-        "CountryInfo": {
-            "Filetype": "file",
-            "Filepath": "./data/country/country_info.csv"
+        "CountryData": {
+            "CountryInfo": {
+                "Filetype": "file",
+                "Filepath": "./data/country/country_info.csv"
+            },
+            "CountryLatLong": {
+                "Filetype": "file",
+                "Filepath": "./data/country/country_latlong.csv"
+            }
         },
         "ArchievedData": {
             "DailyReports": {

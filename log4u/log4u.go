@@ -70,6 +70,10 @@ func formatter() log.Formatter {
 	}
 }
 
+func ContainsLogDebug(level string) bool {
+	return level == "DEBUG"
+}
+
 // CloseLog closing the log file
 func CloseLog() {
 	if logFile != nil {

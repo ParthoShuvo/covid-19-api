@@ -38,9 +38,14 @@ type LogDef struct {
 
 // DbDef database definition
 type DbDef struct {
-	CountryInfo   *DataDef
+	CountryData   *CountryDataDef
 	ArchievedData *DatasetDef
 	CSSE          *DatasetDef
+}
+
+type CountryDataDef struct {
+	CountryInfo    *DataDef
+	CountryLatLong *DataDef
 }
 
 // DatasetDef dataset definition
