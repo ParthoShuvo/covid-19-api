@@ -73,8 +73,8 @@ type (
 
 	// Country definition
 	Country struct {
-		Info    info
-		LatLong latlong
+		Info    info    `json:"info"`
+		LatLong latlong `json:"latlong"`
 	}
 )
 
