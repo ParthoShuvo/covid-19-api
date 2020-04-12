@@ -18,7 +18,7 @@ type customLogFormatter struct {
 
 func (cf *customLogFormatter) Format(entry *log.Entry) ([]byte, error) {
 	function, file := cf.CallerPrettyfier(entry.Caller)
-	return []byte(fmt.Sprintf("[%s] [%s] [%s:%s] => %s",
+	return []byte(fmt.Sprintf("[%s] [%s] [%s:%s] => %s\n",
 		entry.Level.String(),
 		entry.Time.Format(cf.TimestampFormat),
 		file,

@@ -1,9 +1,10 @@
 package db
 
 import (
-	"log"
 	"os"
 	"path"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type parser interface {
@@ -22,7 +23,7 @@ func fetch(filePath string, parser parser) (interface{}, error) {
 		log.Fatalf("failed to open file at %s", filePath)
 		return nil, err
 	}
-	log.Printf("file: %s openedsuccessfully", file.Name())
+	log.Printf("file: %s opened successfully", file.Name())
 	return parser.parse(file)
 }
 

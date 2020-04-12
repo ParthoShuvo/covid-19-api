@@ -19,10 +19,17 @@ func NewCountryResource(dataAccessor db.DataAccessor, w writer.Writer) *CountryR
 	return &CountryResource{dataAccessor, w}
 }
 
-// CountryFetcher provies action to fetch all countries
+// CountryFetcher provides action to fetch all countries
 func (res *CountryResource) CountryFetcher() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		countries := res.da.GetAll().([]db.Country)
 		res.writer.Write(rw, countries)
+	}
+}
+
+// CountryFetcherByCC provides action to fetch a country info by cc
+func (res *CountryResource) CountryFetcherByCC() http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+
 	}
 }
