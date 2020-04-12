@@ -19,9 +19,18 @@ type configData struct {
 	Description string
 	Name        string
 	AllowCORS   bool
+	CORS        *CORSDef `json:"CORS"`
 	Server      *ServerDef
 	Logging     *LogDef
 	Db          *DbDef `json:"Dataset"`
+}
+
+// CORSDef defines allowed cros settings
+type CORSDef struct {
+	AllowedOrigins   []string `json:"AllowedOrigins"`
+	AllowCredentials bool     `json:"AllowCredentials"`
+	AllowedMethods   []string `json:"AllowedMethods"`
+	Debug            bool     `json:"Debug"`
 }
 
 // ServerDef defines a server address and port.
@@ -106,6 +115,11 @@ func (c *Config) AllowCORS() bool {
 // Database returns database definition
 func (c *Config) Database() *DbDef {
 	return c.configData.Db
+}
+
+//CROS definition
+func (c *Config) CORS() *CORSDef {
+	return c.configData.CORS
 }
 
 // Server returns the address and port to use for this service

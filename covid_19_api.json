@@ -2,6 +2,12 @@
     "Description": "Configuration for covid-19-api",
     "Name": "covid-19-api",
     "AllowCORS": true,
+    "CORS": {
+        "AllowedOrigins": ["*"],
+        "AllowCredentials": false,
+        "AllowedMethods": ["GET", "OPTIONS"],
+        "Debug": true
+    },
     "Server": {
         "Bind": "shuvojit.ibfd.org",
         "Port": 9000
