@@ -48,6 +48,8 @@ func buildRoute() *mux.Router {
 
 	cres := resource.NewCountryResource(db.NewDataAccessor(db.CountryData), writer.NewWriter(writer.JSON))
 	apirb.Add("Countries", []string{http.MethodGet}, "/countries", cres.CountryFetcher())
+	apirb.Add("CountryByCC", []string{http.MethodGet}, "/countries/cc/{cc:[a-zA-Z][a-zA-Z]}", cres.CountryFetcherByCC())
+	apirb.Add("CountryByName", []string{http.MethodGet}, "/countries/name/{name:[a-zA-Z]+}", cres.CountryFetcherByName())
 
 	return rb.Router()
 }
