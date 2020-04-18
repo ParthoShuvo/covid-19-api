@@ -51,6 +51,9 @@ func buildRoute() *mux.Router {
 	apirb.Add("CountryByCC", []string{http.MethodGet}, "/countries/cc/{cc:[a-zA-Z][a-zA-Z]}", cres.CountryFetcherByCC())
 	apirb.Add("CountryByName", []string{http.MethodGet}, "/countries/name/{name:[a-zA-Z]+}", cres.CountryFetcherByName())
 
+	csseres := resource.NewCsseDailyReportsResource(db.NewDataAccessor(db.CsseDailyData), writer.NewWriter(writer.JSON))
+	csserb := apirb.NewSubrouteBuilder("/csse")
+	csserb.Add("DailyReports", []string{http.MethodGet}, "/dailyreports", csseres.DailyReportsFetcher())
 	return rb.Router()
 }
 

@@ -3,6 +3,7 @@ package db
 import (
 	"os"
 	"path"
+	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -30,4 +31,22 @@ func fetch(filePath string, parser parser) (interface{}, error) {
 func loadFile(filePath string) (*os.File, error) {
 	exec, _ := os.Executable()
 	return os.Open(path.Join(path.Dir(exec), filePath))
+}
+
+func listFiles(dir string) []string {
+	files := []string{}
+	var walkFn filepath.WalkFunc = func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Errorf("path=%s walking failed, error=%s", path, err.Error())
+			return err
+		}
+		if filepath.Ext(path) != ".csv" {
+			log.Printf("file=%s is not .csv", info.Name())
+			return nil
+		}
+		files = append(files, path)
+		return nil
+	}
+	filepath.Walk(dir, walkFn)
+	return files
 }

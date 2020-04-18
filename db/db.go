@@ -18,7 +18,8 @@ type DataType string
 
 // Stored DataTypes
 const (
-	CountryData DataType = "CountryData"
+	CountryData   DataType = "CountryData"
+	CsseDailyData DataType = "CsseDailyData"
 )
 
 // DataAccessor provies data accessing API or operations from high level business services
@@ -31,7 +32,8 @@ type newDataAccessor func() DataAccessor
 // NewDataAccessor defines a dataAccessor according to DataType
 func NewDataAccessor(dt DataType) DataAccessor {
 	dataAccessorMap := map[DataType]newDataAccessor{
-		CountryData: newCountryDataAccessor,
+		CountryData:   newCountryDataAccessor,
+		CsseDailyData: newCsseDailtDataAccessor,
 	}
 	dataAccessor := dataAccessorMap[dt]
 	return dataAccessor()

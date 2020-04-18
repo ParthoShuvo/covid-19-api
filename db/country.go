@@ -81,6 +81,7 @@ type (
 type countryLatLongParser struct{}
 
 func (cllp countryLatLongParser) parse(csvFile *os.File) (interface{}, error) {
+	defer csvFile.Close()
 	csvReader := csv.NewReader(csvFile)
 	records, err := csvReader.ReadAll()
 	if err != nil {
@@ -104,6 +105,7 @@ func (cllp countryLatLongParser) parse(csvFile *os.File) (interface{}, error) {
 type countryInfoParser struct{}
 
 func (cip countryInfoParser) parse(csvFile *os.File) (interface{}, error) {
+	defer csvFile.Close()
 	csvReader := csv.NewReader(csvFile)
 	records, err := csvReader.ReadAll()
 	if err != nil {
