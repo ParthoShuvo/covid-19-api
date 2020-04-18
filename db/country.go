@@ -167,6 +167,10 @@ func (cda *countryDataAccessor) GetAll() interface{} {
 	return countries
 }
 
+func (cda *countryDataAccessor) GetOne(token interface{}) (interface{}, error) {
+	return nil, nil
+}
+
 func newCountryDataAccessor() DataAccessor {
 	return &countryDataAccessor{dbConfig.CountryData, countryInfoParser{}, countryLatLongParser{}}
 }

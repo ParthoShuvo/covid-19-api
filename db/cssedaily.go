@@ -2,6 +2,8 @@ package db
 
 import (
 	"encoding/csv"
+	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -9,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.io/covid-19-api/cfg"
 )
 
@@ -89,11 +92,35 @@ func (cda *csseDailyDataAccessor) getAllConcurrently(filePaths []string) map[str
 	return dailyReports
 }
 
+func (cda *csseDailyDataAccessor) GetOne(token interface{}) (interface{}, error) {
+	return cda.getDailyReportsByDate(token.(string))
+}
+
+func (cda *csseDailyDataAccessor) getDailyReportsByDate(date string) (interface{}, error) {
+	dateParser := func(path string) string {
+		file, err := os.Open(path)
+		if err != nil {
+			return ""
+		}
+		return parseDate(file)
+	}
+	filePaths := listFiles(cda.dbConfig.Filepath)
+	for _, path := range filePaths {
+		if parsedDate := dateParser(path); parsedDate == date {
+			log.Printf("csse daily reports found for date=%s", date)
+			return fetch(path, cda.parser)
+		}
+	}
+	errMsg := fmt.Sprintf("No csse daily report found for date=%s", date)
+	log.Error(errMsg)
+	return nil, errors.New(errMsg)
+}
+
 type csseDailyReportsParser struct{}
 
 func (cdrp csseDailyReportsParser) parse(csvFile *os.File) (interface{}, error) {
 	defer csvFile.Close()
-	date := strings.TrimSuffix(filepath.Base(csvFile.Name()), path.Ext(csvFile.Name()))
+	date := parseDate(csvFile)
 	csvReader := csv.NewReader(csvFile)
 	records, err := csvReader.ReadAll()
 	if err != nil {
@@ -115,4 +142,8 @@ func (cdrp csseDailyReportsParser) parse(csvFile *os.File) (interface{}, error) 
 		reports = append(reports, &dailyReport)
 	}
 	return &CsseDailyReports{date, reports}, nil
+}
+
+func parseDate(file *os.File) string {
+	return strings.TrimSuffix(filepath.Base(file.Name()), path.Ext(file.Name()))
 }

@@ -53,7 +53,8 @@ func buildRoute() *mux.Router {
 
 	csseres := resource.NewCsseDailyReportsResource(db.NewDataAccessor(db.CsseDailyData), writer.NewWriter(writer.JSON))
 	csserb := apirb.NewSubrouteBuilder("/csse")
-	csserb.Add("DailyReports", []string{http.MethodGet}, "/dailyreports", csseres.DailyReportsFetcher())
+	csserb.Add("DailyReports", []string{http.MethodGet}, "/daily-reports", csseres.DailyReportsFetcher())
+	csserb.Add("DailyReportsByDate", []string{http.MethodGet}, "/daily-reports/{date:[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]}", csseres.DailyReportsFetcherByDate())
 	return rb.Router()
 }
 

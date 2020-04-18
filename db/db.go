@@ -25,6 +25,7 @@ const (
 // DataAccessor provies data accessing API or operations from high level business services
 type DataAccessor interface {
 	GetAll() interface{}
+	GetOne(token interface{}) (interface{}, error)
 }
 
 type newDataAccessor func() DataAccessor
