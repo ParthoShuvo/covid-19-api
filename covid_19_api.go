@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -43,19 +44,29 @@ func main() {
 
 func buildRoute() *mux.Router {
 	rb := route.NewRouteBuilder(config.AllowCORS(), config.AppName(), log4u.ContainsLogDebug(config.Logging().Level))
-
 	apirb := rb.NewSubrouteBuilder("/covid-19/api")
-
-	cres := resource.NewCountryResource(db.NewDataAccessor(db.CountryData), writer.NewWriter(writer.JSON))
-	apirb.Add("Countries", []string{http.MethodGet}, "/countries", cres.CountryFetcher())
-	apirb.Add("CountryByCC", []string{http.MethodGet}, "/countries/cc/{cc:[a-zA-Z][a-zA-Z]}", cres.CountryFetcherByCC())
-	apirb.Add("CountryByName", []string{http.MethodGet}, "/countries/name/{name:[a-zA-Z]+}", cres.CountryFetcherByName())
-
-	csseres := resource.NewCsseDailyReportsResource(db.NewDataAccessor(db.CsseDailyData), writer.NewWriter(writer.JSON))
-	csserb := apirb.NewSubrouteBuilder("/csse")
-	csserb.Add("DailyReports", []string{http.MethodGet}, "/daily-reports", csseres.DailyReportsFetcher())
-	csserb.Add("DailyReportsByDate", []string{http.MethodGet}, "/daily-reports/{date:[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]}", csseres.DailyReportsFetcherByDate())
+	addCountryRoutes(apirb)
+	addCSSERoutes(apirb)
 	return rb.Router()
+}
+
+func addCountryRoutes(rb *route.Builder) {
+	var emptyQry map[string]string
+	cres := resource.NewCountryResource(db.NewDataAccessor(db.CountryData), writer.NewWriter(writer.JSON))
+	rb.Add("Countries", []string{http.MethodGet}, "/countries", emptyQry, cres.CountryFetcher())
+	rb.Add("CountryByCC", []string{http.MethodGet}, "/countries/cc/{cc:[a-zA-Z][a-zA-Z]}", emptyQry, cres.CountryFetcherByCC())
+	rb.Add("CountryByName", []string{http.MethodGet}, "/countries/name/{name:[a-zA-Z]+}", emptyQry, cres.CountryFetcherByName())
+}
+
+func addCSSERoutes(rb *route.Builder) {
+	var emptyQuery map[string]string
+	csseres := resource.NewCsseDailyReportsResource(db.NewDataAccessor(db.CsseDailyData), writer.NewWriter(writer.JSON))
+	csserb := rb.NewSubrouteBuilder("/csse")
+	csserb.Add("DailyReports", []string{http.MethodGet}, "/daily-reports", emptyQuery, csseres.DailyReportsFetcher())
+
+	datePattern := "[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" //MM-dd-YYYY
+	datePath := fmt.Sprintf("{date:%s}", datePattern)
+	csserb.Add("DailyReportsByDate", []string{http.MethodGet}, "/daily-reports/"+datePath, emptyQuery, csseres.DailyReportsFetcherByDate())
 }
 
 func addMiddleware(router *mux.Router) http.Handler {
