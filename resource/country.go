@@ -1,33 +1,32 @@
 package resource
 
 import (
-	"fmt"
-	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
-
 	"github.io/covid-19-api/resource/writer"
-
-	"github.io/covid-19-api/db"
+	"github.io/covid-19-api/uc/country"
 )
 
 // CountryResource defines country resources
 type CountryResource struct {
-	da     db.DataAccessor
+	env    *country.CountryEnv
 	writer writer.Writer
 }
 
 // NewCountryResource definition
-func NewCountryResource(dataAccessor db.DataAccessor, w writer.Writer) *CountryResource {
-	return &CountryResource{dataAccessor, w}
+func NewCountryResource(env *country.CountryEnv, w writer.Writer) *CountryResource {
+	return &CountryResource{env, w}
 }
 
 // CountryFetcher provides action to fetch all countries
 func (res *CountryResource) CountryFetcher() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		countries := res.da.GetAll().([]db.Country)
+		countries, err := res.env.ReadAllCountries()
+		if err != nil {
+			// TODO: handle error
+			return
+		}
 		res.writer.Write(rw, countries)
 	}
 }
@@ -36,16 +35,12 @@ func (res *CountryResource) CountryFetcher() http.HandlerFunc {
 func (res *CountryResource) CountryFetcherByCC() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		cc := mux.Vars(req)["cc"]
-		pred := func(country db.Country) bool {
-			return strings.EqualFold(country.LatLong.CC, cc)
-		}
-		if country := res.findCountry(pred); country != nil {
-			res.writer.Write(rw, country)
+		country, err := res.env.ReadCountryByCC(cc)
+		if err != nil {
+			// TODO: handle error
 			return
 		}
-		log.Printf("no country found by cc=%s", cc)
-		rw.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(rw, "Not found")
+		res.writer.Write(rw, country)
 	}
 }
 
@@ -53,25 +48,11 @@ func (res *CountryResource) CountryFetcherByCC() http.HandlerFunc {
 func (res *CountryResource) CountryFetcherByName() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		name := mux.Vars(req)["name"]
-		pred := func(country db.Country) bool {
-			return strings.EqualFold(country.Info.Name, name)
-		}
-		if country := res.findCountry(pred); country != nil {
-			res.writer.Write(rw, country)
+		country, err := res.env.ReadCountryByName(name)
+		if err != nil {
+			// TODO: handle error
 			return
 		}
-		log.Printf("no country found by name=%s", name)
-		rw.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(rw, "Not found")
+		res.writer.Write(rw, country)
 	}
-}
-
-func (res *CountryResource) findCountry(predicate func(country db.Country) bool) *db.Country {
-	countries := res.da.GetAll().([]db.Country)
-	for _, country := range countries {
-		if predicate(country) {
-			return &country
-		}
-	}
-	return nil
 }
