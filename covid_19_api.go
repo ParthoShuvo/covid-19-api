@@ -55,9 +55,9 @@ func buildRoute(db *model.DB) *mux.Router {
 func addCountryRoutes(rb *route.Builder, db *model.DB) {
 	var emptyQry map[string]string
 	cres := resource.NewCountryResource(country.NewEnv(db), writer.NewWriter(writer.JSON))
+	rb.Add("CountriesByNames", []string{http.MethodGet}, "/countries", map[string]string{"name": "{[a-zA-Z ]*}"}, cres.CountryFetcherByName())
 	rb.Add("Countries", []string{http.MethodGet}, "/countries", emptyQry, cres.CountryFetcher())
 	rb.Add("CountryByCC", []string{http.MethodGet}, "/countries/cc/{cc:[a-zA-Z][a-zA-Z]}", emptyQry, cres.CountryFetcherByCC())
-	rb.Add("CountryByName", []string{http.MethodGet}, "/countries/name/{name:[a-zA-Z]+}", emptyQry, cres.CountryFetcherByName())
 }
 
 func addCSSERoutes(rb *route.Builder, db *model.DB) {
