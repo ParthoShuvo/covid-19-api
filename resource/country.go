@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	"github.io/covid-19-api/resource/writer"
 	"github.io/covid-19-api/uc/country"
 )
@@ -24,7 +25,7 @@ func (res *CountryResource) CountryFetcher() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		countries, err := res.env.ReadAllCountries()
 		if err != nil {
-			// TODO: handle error
+			log.Error(err)
 			return
 		}
 		res.writer.Write(rw, countries)
@@ -37,7 +38,8 @@ func (res *CountryResource) CountryFetcherByCC() http.HandlerFunc {
 		cc := mux.Vars(req)["cc"]
 		country, err := res.env.ReadCountryByCC(cc)
 		if err != nil {
-			// TODO: handle error
+			log.Error(err)
+			SendError(rw, err)
 			return
 		}
 		res.writer.Write(rw, country)
@@ -50,7 +52,8 @@ func (res *CountryResource) CountryFetcherByName() http.HandlerFunc {
 		name := mux.Vars(req)["name"]
 		country, err := res.env.ReadCountryByName(name)
 		if err != nil {
-			// TODO: handle error
+			log.Error(err)
+			SendError(rw, err)
 			return
 		}
 		res.writer.Write(rw, country)

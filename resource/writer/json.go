@@ -16,8 +16,7 @@ func (w jsonWriter) Write(rw http.ResponseWriter, data interface{}) {
 		http.Error(rw, "500 - "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	rw.WriteHeader(http.StatusOK)
-	rw.Header().Set("Content-Type", "application/json; charset=utf8")
+	rw.Header().Add("Content-Type", "application/json")
 	rw.Write(json)
 	log.Info("sucessfully responds json data")
 }

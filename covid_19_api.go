@@ -31,7 +31,7 @@ func main() {
 		err error
 	)
 	if db, err = model.NewDB(config.Database()); err != nil {
-		log.Panic("DB initialization failed")
+		log.Fatal("DB initialization failed")
 	}
 	srv := &http.Server{
 		Addr:         config.Server().String(),
@@ -72,6 +72,8 @@ func addCSSERoutes(rb *route.Builder, db *model.DB) {
 }
 
 func addMiddleware(router *mux.Router) http.Handler {
-	plm := middleware.PerformanceLogMiddleware(router, log4u.ContainsLogDebug(config.Logging().Level))
-	return middleware.CORSMiddleware(plm, config.AllowCORS(), config.CORS())
+	rm := middleware.RecoveryMiddleware(router)
+	plm := middleware.PerformanceLogMiddleware(rm, log4u.ContainsLogDebug(config.Logging().Level))
+	crsm := middleware.CORSMiddleware(plm, config.AllowCORS(), config.CORS())
+	return crsm
 }

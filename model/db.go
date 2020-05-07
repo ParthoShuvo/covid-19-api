@@ -1,10 +1,8 @@
 package model
 
 import (
-	"errors"
-
-	log "github.com/sirupsen/logrus"
 	"github.io/covid-19-api/cfg"
+	"github.io/covid-19-api/errors"
 )
 
 type DB struct {
@@ -12,9 +10,8 @@ type DB struct {
 }
 
 func NewDB(dbConfig *cfg.DbDef) (*DB, error) {
-	if dbConfig == nil {
-		log.Error("DB config is empty")
-		return nil, errors.New("DB config is empty")
+	if dbConfig == nil || (cfg.DbDef{}) == *dbConfig {
+		return &DB{}, errors.InternalServerError.New("DB config is empty")
 	}
 	return &DB{dbConfig}, nil
 }

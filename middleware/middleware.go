@@ -1,12 +1,15 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/rs/cors"
 
 	"github.io/covid-19-api/cfg"
+	"github.io/covid-19-api/errors"
+	"github.io/covid-19-api/resource"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -35,4 +38,17 @@ func CORSMiddleware(next http.Handler, allowCORS bool, corsDef *cfg.CORSDef) htt
 		return c.Handler(next)
 	}
 	return next
+}
+
+func RecoveryMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				wrappedErr := errors.InternalServerError.New(fmt.Sprint(err))
+				log.Error(wrappedErr)
+				resource.SendError(rw, wrappedErr)
+			}
+		}()
+		next.ServeHTTP(rw, r)
+	})
 }

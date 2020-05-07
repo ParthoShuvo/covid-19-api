@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/csv"
-	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -10,8 +9,8 @@ import (
 	"github.com/ParthoShuvo/fpingo/collection/list"
 	fn "github.com/ParthoShuvo/fpingo/util"
 	"github.com/gocarina/gocsv"
-	log "github.com/sirupsen/logrus"
 	"github.io/covid-19-api/cfg"
+	"github.io/covid-19-api/errors"
 	countryStore "github.io/covid-19-api/uc/country"
 )
 
@@ -54,8 +53,7 @@ func (cllp countryLatLongParser) parse(csvFile *os.File) (interface{}, error) {
 		latlongMap map[ccKey]*Latlong
 	)
 	if err := gocsv.UnmarshalCSV(csv.NewReader(csvFile), &latlongs); err != nil {
-		log.Error("failed to unmarshal %s csv file", csvFile.Name())
-		return latlongMap, err
+		return latlongMap, errors.InternalServerError.Wrapf(err, "failed to unmarshal %s csv file", csvFile.Name())
 	}
 	latlongMap = map[ccKey]*Latlong{}
 	list.FromArray(latlongs).ForEach(func(i interface{}) {
@@ -74,8 +72,7 @@ func (cip countryInfoParser) parse(csvFile *os.File) (interface{}, error) {
 		infoMap map[ccKey]*CountryInfo
 	)
 	if err := gocsv.UnmarshalCSV(csv.NewReader(csvFile), &infos); err != nil {
-		log.Error("failed to unmarshal %s csv file", csvFile.Name())
-		return infoMap, err
+		return infoMap, errors.InternalServerError.Wrapf(err, "failed to unmarshal %s csv file", csvFile.Name())
 	}
 	infoMap = map[ccKey]*CountryInfo{}
 	list.FromArray(infos).ForEach(func(i interface{}) {
@@ -95,14 +92,12 @@ type countryDataAccessor struct {
 func (cda *countryDataAccessor) getAll() (*countryData, error) {
 	i, err := fetch(cda.dbConfig.CountryInfo.Filepath, cda.infoParser)
 	if err != nil {
-		log.Error("Country Info parsing failed")
-		return nil, err
+		return &countryData{}, err
 	}
 
 	l, err := fetch(cda.dbConfig.CountryLatLong.Filepath, cda.latlongParser)
 	if err != nil {
-		log.Error("Latlong parsing failed")
-		return nil, err
+		return &countryData{}, err
 	}
 	infoMap, latlongMap := i.(map[ccKey]*CountryInfo), l.(map[ccKey]*Latlong)
 	return &countryData{infoMap, latlongMap}, nil
@@ -111,10 +106,9 @@ func (cda *countryDataAccessor) getAll() (*countryData, error) {
 func (database *DB) ReadAllCountries() ([]*countryStore.Country, error) {
 	var countries []*countryStore.Country
 	da := &countryDataAccessor{database.config.CountryData, countryInfoParser{}, countryLatLongParser{}}
-	countryData, error := da.getAll()
-	if error != nil {
-		log.Error("Failed to parse country data")
-		return countries, error
+	countryData, err := da.getAll()
+	if err != nil {
+		return countries, err
 	}
 	for cc, info := range countryData.infoMap {
 		if latlong, exists := countryData.latlongMap[cc]; exists {
@@ -151,9 +145,10 @@ func (database *DB) ReadCountryByCC(cc string) (*countryStore.Country, error) {
 	}
 	country, err := database.findCountry(predicateFn)
 	if err != nil {
-		log.Errorf("No country is found by CC: %s", cc)
+		err = errors.NotFound.Wrapf(err, "No country is found by CC: %s", cc)
+		return &countryStore.Country{}, err
 	}
-	return country, err
+	return country, nil
 }
 
 func (database *DB) ReadCountryByName(name string) (*countryStore.Country, error) {
@@ -162,21 +157,21 @@ func (database *DB) ReadCountryByName(name string) (*countryStore.Country, error
 	}
 	country, err := database.findCountry(predicateFn)
 	if err != nil {
-		log.Errorf("No country is found by name: %s", name)
+		err = errors.NotFound.Wrapf(err, "No country is found by name: %s", name)
+		return &countryStore.Country{}, err
 	}
-	return country, err
+	return country, nil
 }
 
 func (database *DB) findCountry(p fn.Predicate) (*countryStore.Country, error) {
-	var country *countryStore.Country
 	countries, err := database.ReadAllCountries()
 	if err != nil {
-		return country, err
+		return &countryStore.Country{}, err
 	}
 	i := list.FromArray(countries).FindFirst(p)
 	if i == nil {
-		return country, errors.New("No country found")
+		return &countryStore.Country{}, errors.NotFound.New("No country found")
 	}
-	country = i.(*countryStore.Country)
+	country := i.(*countryStore.Country)
 	return country, nil
 }

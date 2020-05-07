@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
+	"github.io/covid-19-api/errors"
 )
 
 type parser interface {
@@ -21,8 +22,7 @@ func (d defaultParser) parse() (interface{}, error) {
 func fetch(filePath string, parser parser) (interface{}, error) {
 	file, err := loadFile(filePath)
 	if err != nil {
-		log.Fatalf("failed to open file at %s", filePath)
-		return nil, err
+		return nil, errors.InternalServerError.Wrapf(err, "failed to open file: %s", filePath)
 	}
 	log.Printf("file: %s opened successfully", file.Name())
 	return parser.parse(file)
@@ -37,8 +37,7 @@ func listFiles(dir string) []string {
 	files := []string{}
 	var walkFn filepath.WalkFunc = func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.Errorf("path=%s walking failed, error=%s", path, err.Error())
-			return err
+			return errors.InternalServerError.Wrapf(err, "path=%s walking failed", path)
 		}
 		if filepath.Ext(path) != ".csv" {
 			log.Printf("file=%s is not .csv", info.Name())
