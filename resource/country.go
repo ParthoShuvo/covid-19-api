@@ -53,7 +53,7 @@ func (res *CountryResource) CountryFetcherByCC() http.HandlerFunc {
 	}
 }
 
-// CountryFetcherByName provides action to fetch a country info by name
+// CountryFetcherByName provides action to fetch countries by names
 func (res *CountryResource) CountryFetcherByName() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		names := req.URL.Query()["name"]
