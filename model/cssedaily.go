@@ -1,149 +1,213 @@
 package model
 
-// import (
-// 	"encoding/csv"
-// 	"errors"
-// 	"fmt"
-// 	"os"
-// 	"path"
-// 	"path/filepath"
-// 	"strconv"
-// 	"strings"
-// 	"sync"
+import (
+	"encoding/csv"
+	"os"
+	"path"
+	"path/filepath"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
 
-// 	log "github.com/sirupsen/logrus"
-// 	"github.io/covid-19-api/cfg"
-// )
+	"github.com/ParthoShuvo/fpingo/collection/list"
+	"github.com/gocarina/gocsv"
+	log "github.com/sirupsen/logrus"
+	"github.io/covid-19-api/cfg"
+	"github.io/covid-19-api/errors"
+	"github.io/covid-19-api/uc/country"
+	"github.io/covid-19-api/uc/cssedaily"
+)
 
-// // MM-dd-YYYY.csv daily report fields
-// var dailyReportsField = struct {
-// 	ProvinceState csvField
-// 	CountryRegion csvField
-// 	LastUpdate    csvField
-// 	Confirmed     csvField
-// 	Deaths        csvField
-// 	Recovered     csvField
-// }{
-// 	ProvinceState: 0,
-// 	CountryRegion: 1,
-// 	LastUpdate:    2,
-// 	Confirmed:     3,
-// 	Deaths:        4,
-// 	Recovered:     5,
-// }
+type (
+	// CsseRegionReport definition
+	CsseRegionReport struct {
+		ProvinceState string `csv:"Province/State"`
+		CountryRegion string `csv:"Country/Region"`
+		LastUpdate    string `csv:"Last Update"`
+		Confirmed     string `csv:"Confirmed"`
+		Deaths        string `csv:"Deaths"`
+		Recovered     string `csv:"Recovered"`
+	}
 
-// type (
-// 	// CsseReport definition
-// 	CsseReport struct {
-// 		CountryRegion string `json:"country/region"`
-// 		ProvinceState string `json:"province/state"`
-// 		LastUpdate    string `json:"last-update"`
-// 		Confirmed     int    `json:"confirmed"`
-// 		Deaths        int    `json:"deaths"`
-// 		Recovered     int    `json:"recovered"`
-// 	}
+	csseDailyReport struct {
+		date    string
+		reports []*CsseRegionReport
+	}
 
-// 	// CsseDailyReports definition
-// 	CsseDailyReports struct {
-// 		Date    string        `json:"-"`
-// 		Reports []*CsseReport `json:"reports"`
-// 	}
-// )
+	csseDailyReportChan struct {
+		dailyReport *csseDailyReport
+		err         error
+	}
+)
 
-// type csseDailyDataAccessor struct {
-// 	dbConfig *cfg.DataDef
-// 	parser   csseDailyReportsParser
-// }
+type csseDailyReportsParser struct{}
 
-// func newCsseDailtDataAccessor() DataAccessor {
-// 	return &csseDailyDataAccessor{dbConfig.CSSE.DailyReports, csseDailyReportsParser{}}
-// }
+func (parser csseDailyReportsParser) parse(csvFile *os.File) (interface{}, error) {
+	defer csvFile.Close()
+	var regionReports []*CsseRegionReport
+	if err := gocsv.UnmarshalCSV(csv.NewReader(csvFile), &regionReports); err != nil {
+		err = errors.InternalServerError.Wrapf(err, "failed to parse file: %s", csvFile.Name)
+		return &csseDailyReport{}, err
+	}
+	return &csseDailyReport{
+		date:    parser.parseDate(csvFile),
+		reports: regionReports,
+	}, nil
+}
 
-// // GetAll returns all Countries
-// func (cda *csseDailyDataAccessor) GetAll() interface{} {
-// 	filePaths := listFiles(cda.dbConfig.Filepath)
-// 	return cda.getAllConcurrently(filePaths)
-// }
+func (parser *csseDailyReportsParser) parseDate(file *os.File) string {
+	return strings.TrimSuffix(filepath.Base(file.Name()), path.Ext(file.Name()))
+}
 
-// func (cda *csseDailyDataAccessor) getAllConcurrently(filePaths []string) map[string]*CsseDailyReports {
-// 	records := make(chan *CsseDailyReports, len(filePaths))
-// 	var waitgrp sync.WaitGroup
-// 	waitgrp.Add(len(filePaths))
-// 	for _, path := range filePaths {
-// 		go func(path string, record chan<- *CsseDailyReports) {
-// 			defer waitgrp.Done()
-// 			result, _ := fetch(path, cda.parser)
-// 			tmp := result.(*CsseDailyReports)
-// 			record <- tmp
-// 		}(path, records)
-// 	}
+type csseDailyDataAccessor struct {
+	dbConfig *cfg.DataDef
+	parser   csseDailyReportsParser
+}
 
-// 	go func() {
-// 		waitgrp.Wait()
-// 		close(records)
-// 	}()
+func (da *csseDailyDataAccessor) GetAll() ([]*csseDailyReport, error) {
+	filePaths := listFiles(da.dbConfig.Filepath)
+	return da.getAllConcurrently(filePaths)
+}
 
-// 	dailyReports := make(map[string]*CsseDailyReports)
-// 	for record := range records {
-// 		if record != nil {
-// 			dailyReports[record.Date] = record
-// 		}
-// 	}
-// 	return dailyReports
-// }
+func (da *csseDailyDataAccessor) getAllConcurrently(filePaths []string) ([]*csseDailyReport, error) {
+	reportChan := make(chan *csseDailyReportChan, len(filePaths))
+	da.concurrentRun(filePaths, reportChan)
+	var (
+		csseDailyReports []*csseDailyReport
+		err              error
+	)
+	for report := range reportChan {
+		if report.err != nil {
+			err = errors.InternalServerError.Wrap(err, report.err.Error())
+			continue
+		}
+		csseDailyReports = append(csseDailyReports, report.dailyReport)
+	}
+	if len(csseDailyReports) == 0 {
+		return []*csseDailyReport{}, err
+	}
+	sort.Slice(csseDailyReports, da.prevDateComparator(csseDailyReports, "01-02-2006"))
+	return csseDailyReports, nil
+}
 
-// func (cda *csseDailyDataAccessor) GetOne(token interface{}) (interface{}, error) {
-// 	return cda.getDailyReportsByDate(token.(string))
-// }
+func (da *csseDailyDataAccessor) concurrentRun(filePaths []string, reportChan chan<- *csseDailyReportChan) {
+	var waitgrp sync.WaitGroup
+	waitgrp.Add(len(filePaths))
+	for _, path := range filePaths {
+		go func(path string) {
+			defer waitgrp.Done()
+			da.fetchAndSend(path, reportChan)
+		}(path)
+	}
+	go func() {
+		waitgrp.Wait()
+		close(reportChan)
+	}()
+}
 
-// func (cda *csseDailyDataAccessor) getDailyReportsByDate(date string) (interface{}, error) {
-// 	dateParser := func(path string) string {
-// 		file, err := os.Open(path)
-// 		if err != nil {
-// 			return ""
-// 		}
-// 		return parseDate(file)
-// 	}
-// 	filePaths := listFiles(cda.dbConfig.Filepath)
-// 	for _, path := range filePaths {
-// 		if parsedDate := dateParser(path); parsedDate == date {
-// 			log.Printf("csse daily reports found for date=%s", date)
-// 			return fetch(path, cda.parser)
-// 		}
-// 	}
-// 	errMsg := fmt.Sprintf("No csse daily report found for date=%s", date)
-// 	log.Error(errMsg)
-// 	return nil, errors.New(errMsg)
-// }
+func (da *csseDailyDataAccessor) fetchAndSend(filePath string, sender chan<- *csseDailyReportChan) {
+	if result, err := fetch(filePath, da.parser); err != nil {
+		sender <- &csseDailyReportChan{&csseDailyReport{}, err}
+	} else {
+		sender <- &csseDailyReportChan{result.(*csseDailyReport), nil}
+	}
+}
 
-// type csseDailyReportsParser struct{}
+func (da *csseDailyDataAccessor) prevDateComparator(dailyReports []*csseDailyReport, layout string) func(i, j int) bool {
+	return func(i, j int) bool {
+		prevDate, prevDateErr := parseDate(dailyReports[i].date, layout)
+		nextDate, nextDateErr := parseDate(dailyReports[j].date, layout)
+		if prevDateErr != nil {
+			log.Error("failed to parsed date %s", dailyReports[i].date)
+			return true
+		}
+		if nextDateErr != nil {
+			log.Error("failed to parsed date %s", dailyReports[j].date)
+			return true
+		}
+		return prevDate.Before(nextDate)
+	}
+}
 
-// func (cdrp csseDailyReportsParser) parse(csvFile *os.File) (interface{}, error) {
-// 	defer csvFile.Close()
-// 	date := parseDate(csvFile)
-// 	csvReader := csv.NewReader(csvFile)
-// 	records, err := csvReader.ReadAll()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	reports := []*CsseReport{}
-// 	for _, record := range records[1:] {
-// 		deaths, _ := strconv.Atoi(record[dailyReportsField.Deaths])
-// 		recovered, _ := strconv.Atoi(record[dailyReportsField.Recovered])
-// 		confirmed, _ := strconv.Atoi(record[dailyReportsField.Confirmed])
-// 		dailyReport := CsseReport{
-// 			CountryRegion: record[dailyReportsField.CountryRegion],
-// 			ProvinceState: record[dailyReportsField.ProvinceState],
-// 			LastUpdate:    record[dailyReportsField.LastUpdate],
-// 			Confirmed:     confirmed,
-// 			Deaths:        deaths,
-// 			Recovered:     recovered,
-// 		}
-// 		reports = append(reports, &dailyReport)
-// 	}
-// 	return &CsseDailyReports{date, reports}, nil
-// }
+func (database *DB) ReadAllDailyReports() ([]*cssedaily.DailyReport, error) {
+	csseDa := &csseDailyDataAccessor{database.config.CSSE.DailyReports, csseDailyReportsParser{}}
+	if csseDailyReports, err := csseDa.GetAll(); err != nil {
+		err = errors.InternalServerError.Wrap(err, "failed to read csse daily reports")
+		return []*cssedaily.DailyReport{}, err
+	} else {
+		countries, _ := database.ReadAllCountries()
+		return database.composeCsseDailyWithCountries(csseDailyReports, countries), nil
+	}
+}
 
-// func parseDate(file *os.File) string {
-// 	return strings.TrimSuffix(filepath.Base(file.Name()), path.Ext(file.Name()))
-// }
+func (database *DB) ReadDailyReport(date string) (*cssedaily.DailyReport, error) {
+	dailyReports, err := database.ReadAllDailyReports()
+	if err != nil {
+		return &cssedaily.DailyReport{}, err
+	}
+	report := list.FromArray(dailyReports).FindFirst(func(r interface{}) bool {
+		return date == r.(*cssedaily.DailyReport).Date
+	})
+	if report == nil {
+		return &cssedaily.DailyReport{}, errors.NotFound.Newf("csse daily report in not found on %s", date)
+	}
+	return report.(*cssedaily.DailyReport), nil
+}
+
+func (database *DB) composeCsseDailyWithCountries(csseDailyReports []*csseDailyReport, countries []*country.Country) []*cssedaily.DailyReport {
+	countryList := list.FromArray(countries)
+	regionMapper := func(d *CsseRegionReport) *cssedaily.RegionReport {
+		region := database.toCsseRegionReport(d)
+		c := countryList.FindFirst(func(c interface{}) bool {
+			return strings.EqualFold(c.(*country.Country).Name, region.CountryRegion) ||
+				strings.EqualFold(c.(*country.Country).CC, region.CountryRegion)
+		})
+		if c != nil {
+			region.CC = c.(*country.Country).CC
+		}
+		return region
+	}
+	var dailyReports []*cssedaily.DailyReport
+	for _, report := range csseDailyReports {
+		dailyReports = append(dailyReports, database.toCsseDailyReport(report, regionMapper))
+	}
+	return dailyReports
+}
+
+func (database *DB) toCsseDailyReport(data *csseDailyReport, regionMapper func(data *CsseRegionReport) *cssedaily.RegionReport) *cssedaily.DailyReport {
+	var (
+		regionReports  []*cssedaily.RegionReport
+		totalConfirmed int
+		totalDeaths    int
+		totalRecovered int
+	)
+	for _, d := range data.reports {
+		regionReport := regionMapper(d)
+		totalConfirmed += regionReport.Confirmed
+		totalDeaths += regionReport.Deaths
+		totalRecovered += regionReport.Recovered
+		regionReports = append(regionReports, regionReport)
+	}
+	return &cssedaily.DailyReport{
+		Date:           data.date,
+		TotalConfirmed: totalConfirmed,
+		TotalDeaths:    totalDeaths,
+		TotalRecovered: totalDeaths,
+		Reports:        regionReports,
+	}
+}
+
+func (database *DB) toCsseRegionReport(data *CsseRegionReport) *cssedaily.RegionReport {
+	confirmed, _ := strconv.Atoi(data.Confirmed)
+	deaths, _ := strconv.Atoi(data.Deaths)
+	recovered, _ := strconv.Atoi(data.Recovered)
+	return &cssedaily.RegionReport{
+		CountryRegion: data.CountryRegion,
+		ProvinceState: data.ProvinceState,
+		LastUpdate:    data.LastUpdate,
+		Confirmed:     confirmed,
+		Deaths:        deaths,
+		Recovered:     recovered,
+	}
+}

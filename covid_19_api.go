@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.io/covid-19-api/resource/writer"
 	"github.io/covid-19-api/route"
 	"github.io/covid-19-api/uc/country"
+	"github.io/covid-19-api/uc/cssedaily"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -61,14 +63,18 @@ func addCountryRoutes(rb *route.Builder, db *model.DB) {
 }
 
 func addCSSERoutes(rb *route.Builder, db *model.DB) {
-	// var emptyQuery map[string]string
-	// csseres := resource.NewCsseDailyReportsResource(db.NewDataAccessor(db.CsseDailyData), writer.NewWriter(writer.JSON))
-	// csserb := rb.NewSubrouteBuilder("/csse")
-	// csserb.Add("DailyReports", []string{http.MethodGet}, "/daily-reports", emptyQuery, csseres.DailyReportsFetcher())
-
-	// datePattern := "[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" //MM-dd-YYYY
-	// datePath := fmt.Sprintf("{date:%s}", datePattern)
-	// csserb.Add("DailyReportsByDate", []string{http.MethodGet}, "/daily-reports/"+datePath, emptyQuery, csseres.DailyReportsFetcherByDate())
+	var emptyQuery map[string]string
+	csseres := resource.NewCsseDailyReportsResource(cssedaily.New(db), writer.NewWriter(writer.JSON))
+	csserb := rb.NewSubrouteBuilder("/csse")
+	csserb.Add("DailyReportsWithPagination", []string{http.MethodGet}, "/daily-reports",
+		map[string]string{"page": "{[1-9][0-9]*}", "pagesize": "{[1-9][0-9]*}"},
+		csseres.DailyReportsFetcher())
+	csserb.Add("DailyReportsWithPagination", []string{http.MethodGet}, "/daily-reports",
+		emptyQuery, csseres.DailyReportsFetcher())
+	datePattern := "[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" //MM-dd-YYYY
+	datePath := fmt.Sprintf("{date:%s}", datePattern)
+	csserb.Add("DailyReportsByDate", []string{http.MethodGet}, "/daily-reports/"+datePath,
+		emptyQuery, csseres.DailyReportsFetcherByDate())
 }
 
 func addMiddleware(router *mux.Router) http.Handler {
