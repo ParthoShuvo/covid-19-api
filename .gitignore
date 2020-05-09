@@ -2,3 +2,6 @@ covid-19-api
 .vscode/launch.json
 covid_19_api.log
 vendor/**/*
+.vscode/settings.json
+COVID-19/**/*
+data/**/*
