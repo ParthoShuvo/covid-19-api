@@ -2,28 +2,18 @@ package resource
 
 import (
 	"net/http"
-	"net/url"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"github.io/covid-19-api/errors"
 	"github.io/covid-19-api/resource/writer"
 	"github.io/covid-19-api/uc/cssedaily"
 )
 
-type (
-	// CsseDailyReportsResource defines country resources
-	CsseDailyReportsResource struct {
-		env    *cssedaily.Env
-		writer writer.Writer
-	}
-
-	pageInfo struct {
-		page     int
-		pageSize int
-	}
-)
+// CsseDailyReportsResource defines country resources
+type CsseDailyReportsResource struct {
+	env    *cssedaily.Env
+	writer writer.Writer
+}
 
 // NewCsseDailyReportsResource definition
 func NewCsseDailyReportsResource(env *cssedaily.Env, w writer.Writer) *CsseDailyReportsResource {
@@ -33,7 +23,7 @@ func NewCsseDailyReportsResource(env *cssedaily.Env, w writer.Writer) *CsseDaily
 // DailyReportsFetcher provides action to fetch all dailyreports
 func (cdr *CsseDailyReportsResource) DailyReportsFetcher() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		pinfo, pageInfoErr := cdr.parsePageInfo(req.URL.Query())
+		pinfo, pageInfoErr := parsePageInfo(req.URL.Query())
 		if pageInfoErr != nil {
 			log.Error(pageInfoErr)
 			SendError(rw, pageInfoErr)
@@ -47,27 +37,6 @@ func (cdr *CsseDailyReportsResource) DailyReportsFetcher() http.HandlerFunc {
 		}
 		cdr.writer.Write(rw, dailyReports)
 	}
-}
-
-func (cdr *CsseDailyReportsResource) parsePageInfo(query url.Values) (*pageInfo, error) {
-	var (
-		page            int
-		pageSize        int
-		defaultPage     int = 1
-		defaultPageSize int = 10
-	)
-	anyOrElse := func(val string, defaultVal int) int {
-		if parsedVal, err := strconv.Atoi(val); err == nil {
-			return parsedVal
-		}
-		return defaultVal
-	}
-	isNeg := func(val int) bool { return val < 0 }
-	page, pageSize = anyOrElse(query.Get("page"), defaultPage), anyOrElse(query.Get("pagesize"), defaultPageSize)
-	if isNeg(page) || isNeg(pageSize) {
-		return &pageInfo{}, errors.BadRequest.New("malformed query param values in page & pagesize")
-	}
-	return &pageInfo{page, pageSize}, nil
 }
 
 // DailyReportsFetcherByDate provides action to fetch one dailyreports by date

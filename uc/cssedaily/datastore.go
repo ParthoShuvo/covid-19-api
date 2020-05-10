@@ -18,6 +18,13 @@ type (
 		TotalRecovered int             `json:"total-recovered"`
 		Reports        []*RegionReport `json:"reports"`
 	}
+
+	CsseDailyData struct {
+		TotalReports int            `json:"total-reports"`
+		Page         int            `json:"page"`
+		PageSize     int            `json:"page-size"`
+		DailyReports []*DailyReport `json:"daily-reports"`
+	}
 	CsseDailyDatastore interface {
 		ReadAllDailyReports() ([]*DailyReport, error)
 		ReadDailyReport(date string) (*DailyReport, error)

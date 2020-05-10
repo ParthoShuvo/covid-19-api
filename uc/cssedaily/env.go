@@ -15,13 +15,19 @@ const (
 	defaultPage     int = 1
 )
 
-func (env *Env) ReadAllDailyReports(page, pageSize int) ([]*DailyReport, error) {
+func (env *Env) ReadAllDailyReports(page, pageSize int) (*CsseDailyData, error) {
 	if dailyReports, err := env.ds.ReadAllDailyReports(); err != nil {
-		return dailyReports, err
+		return &CsseDailyData{}, err
 	} else {
 		paginator := uc.NewPaginator(defaultPageSize, defaultPage)
-		offset, limit := paginator.Paginate(len(dailyReports), pageSize, page)
-		return dailyReports[offset:limit:limit], err
+		totalSize := len(dailyReports)
+		offset, limit := paginator.Paginate(totalSize, pageSize, page)
+		return &CsseDailyData{
+			TotalReports: totalSize,
+			Page:         page,
+			PageSize:     pageSize,
+			DailyReports: dailyReports[offset:limit:limit],
+		}, nil
 	}
 }
 
