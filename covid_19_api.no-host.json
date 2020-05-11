@@ -1,0 +1,71 @@
+{
+    "Description": "Configuration for covid-19-api",
+    "Name": "covid-19-api",
+    "AllowCORS": true,
+    "CORS": {
+        "AllowedOrigins": ["*"],
+        "AllowCredentials": false,
+        "AllowedMethods": ["GET", "OPTIONS"],
+        "Debug": true
+    },
+    "Server": {
+        "Bind": "",
+        "Port": 9000
+    },
+    "Logging": {
+        "Filename": "./covid_19_api.log",
+        "Level": "DEBUG"
+    },
+    "Dataset": {
+        "CountryData": {
+            "CountryInfo": {
+                "Filetype": "file",
+                "Filepath": "./data/country/country_info.csv"
+            },
+            "CountryLatLong": {
+                "Filetype": "file",
+                "Filepath": "./data/country/country_latlong.csv"
+            }
+        },
+        "ArchievedData": {
+            "DailyReports": {
+                "Filetype": "folder",
+                "Filepath": "./data/archived_data/archived_daily_case_updates"
+            },
+            "TimeSeries": {
+                "Confirmed": {
+                    "Filetype": "file",
+                    "Filepath": "./data/archived_data/archived_time_series/time_series_2019-ncov-Confirmed.csv"
+                },
+                "Deaths": {
+                    "Filetype": "file",
+                    "Filepath": "./data/archived_data/archived_time_series/time_series_2019-ncov-Deaths.csv"
+                },
+                "Recovered": {
+                    "Filetype": "file",
+                    "Filepath": "./data/archived_data/archived_time_series/time_series_2019-ncov-Recovered.csv"
+                }
+            }
+        },
+        "CSSE": {
+            "DailyReports": {
+                "Filetype": "folder",
+                "Filepath": "./data/csse_covid_19_data/csse_covid_19_daily_reports"
+            },
+            "TimeSeries": {
+                "Confirmed": {
+                    "Filetype": "file",
+                    "Filepath": "./data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+                },
+                "Deaths": {
+                    "Filetype": "file",
+                    "Filepath": "./data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
+                },
+                "Recovered": {
+                    "Filetype": "file",
+                    "Filepath": "./data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
+                }
+            }
+        }
+    }
+}
