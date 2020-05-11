@@ -5,3 +5,4 @@ vendor/**/*
 .vscode/settings.json
 COVID-19/**/*
 data/**/*
+covid_19_api.no-host.json
