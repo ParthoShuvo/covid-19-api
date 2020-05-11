@@ -11,8 +11,8 @@ func New(ds CsseDailyDatastore) *Env {
 }
 
 const (
-	defaultPageSize int = 10
-	defaultPage     int = 1
+	defaultPageSize = 10
+	defaultPage     = 1
 )
 
 func (env *Env) ReadAllDailyReports(page, pageSize int) (*CsseDailyData, error) {
