@@ -1,7 +1,7 @@
 #!/bin/bash
 #pull COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University
 
-remoteRepo="https://github.com/CSSEGISandData/COVID-19.git"
+remoteRepo="https://github.com/CSSEGISandData/COVID-19/archive/master.zip"
 repoName="COVID-19"
 
 # covid-19-dataset folders
@@ -12,29 +12,38 @@ whoCovid19Data="who_covid_19_situation_reports"
 # declaring tasks to do
 declare -A tasks
 
-# task names
+# task namesch
 removeCovid19Dataset="remove covid-19 dataset"
-cloneCovid19Repo="cloning covid-19 dataset repo"
+downloadDataset="downloading covid-19 dataset repo"
+extractZip="extracting master.zip"
+renameZip="renaming master.zip to $repoName"
 moveArchivedToData="moving $archivedData to data"
 moveCSSEToData="moving $csseCovid19Data to data"
 moveWhoToData="moving $whoCovid19Data to data"
 removeCovid19Repo="removing repo $repoName"
+removeZip="removing master.zip"
 
 tasks[$removeCovid19Dataset]="rm -rf ./data/$archivedData ./data/$csseCovid19Data ./data/$whoCovid19Data"
-tasks[$cloneCovid19Repo]="git clone $remoteRepo"
+tasks[$downloadDataset]="wget $remoteRepo"
+tasks[$extractZip]="unzip master.zip"
+tasks[$renameZip]="mv *master $repoName"
 tasks[$moveArchivedToData]="mv $repoName/$archivedData ./data/"
 tasks[$moveCSSEToData]="mv $repoName/$csseCovid19Data ./data/"
 tasks[$moveWhoToData]="mv $repoName/$whoCovid19Data ./data/"
 tasks[$removeCovid19Repo]="rm -rf $repoName"
+tasks[$removeZip]="rm master.zip"
 
 # declaring tasks order
 declare -a taskOrders
 taskOrders+=("${removeCovid19Dataset}")
-taskOrders+=("${cloneCovid19Repo}")
-taskOrders+=("${moveArchivedToData}")
+taskOrders+=("${downloadDataset}")
+taskOrders+=("${extractZip}")
+taskOrders+=("${renameZip}")
+# taskOrders+=("${moveArchivedToData}")
 taskOrders+=("${moveCSSEToData}")
-taskOrders+=("${moveWhoToData}")
+# taskOrders+=("${moveWhoToData}")
 taskOrders+=("${removeCovid19Repo}")
+taskOrders+=("${removeZip}")
 
 
 #declaring colors
