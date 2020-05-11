@@ -12,6 +12,7 @@ import (
 	"github.io/covid-19-api/route"
 	"github.io/covid-19-api/uc/country"
 	"github.io/covid-19-api/uc/cssedaily"
+	"github.io/covid-19-api/uc/cssetimeseries"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -64,17 +65,49 @@ func addCountryRoutes(rb *route.Builder, db *model.DB) {
 
 func addCSSERoutes(rb *route.Builder, db *model.DB) {
 	var emptyQuery map[string]string
-	csseres := resource.NewCsseDailyReportsResource(cssedaily.New(db), writer.NewWriter(writer.JSON))
+	res := resource.NewCsseDailyReportsResource(cssedaily.New(db), writer.NewWriter(writer.JSON))
 	csserb := rb.NewSubrouteBuilder("/csse")
-	csserb.Add("DailyReportsWithPagination", []string{http.MethodGet}, "/daily-reports",
-		map[string]string{"page": "{[1-9][0-9]*}", "pagesize": "{[1-9][0-9]*}"},
-		csseres.DailyReportsFetcher())
-	csserb.Add("DailyReportsWithPagination", []string{http.MethodGet}, "/daily-reports",
-		emptyQuery, csseres.DailyReportsFetcher())
+	paginationQueryParams := map[string]string{"page": "{[1-9][0-9]*}", "pagesize": "{[1-9][0-9]*}"}
+	csserb.Add("DailyReportsWithPagination", []string{http.MethodGet}, "/daily-reports", paginationQueryParams, res.DailyReportsFetcher())
+
+	csserb.Add("DailyReportsWithPagination", []string{http.MethodGet}, "/daily-reports", emptyQuery, res.DailyReportsFetcher())
+
 	datePattern := "[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" //MM-dd-YYYY
 	datePath := fmt.Sprintf("{date:%s}", datePattern)
-	csserb.Add("DailyReportsByDate", []string{http.MethodGet}, "/daily-reports/"+datePath,
-		emptyQuery, csseres.DailyReportsFetcherByDate())
+	csserb.Add("DailyReportsByDate", []string{http.MethodGet}, "/daily-reports/"+datePath, emptyQuery, res.DailyReportsFetcherByDate())
+
+	addCsseTimeSeriesRoutes(csserb, db)
+}
+
+func addCsseTimeSeriesRoutes(rb *route.Builder, db *model.DB) {
+	res := resource.NewCsseTimeSeriesResource(cssetimeseries.New(db), writer.NewWriter(writer.JSON))
+	trb := rb.NewSubrouteBuilder("/time-series")
+	datePattern := "[0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]"
+
+	paginateQueryParams := map[string]string{
+		"start":    fmt.Sprintf("{%s}", datePattern), //MM-dd-YYYY
+		"end":      "{\\d\\d-\\d\\d-\\d\\d\\d\\d}",   //MM-dd-YYYY
+		"page":     "{[1-9][0-9]*}",
+		"pagesize": "{[1-9][0-9]*}",
+	}
+	trb.Add("TimeSeriesInBetweenByPage", []string{http.MethodGet}, "/between", paginateQueryParams, res.TimeSeriesFetcherInBetween())
+
+	paginateByPageQueryParams := map[string]string{
+		"start": fmt.Sprintf("{%s}", datePattern), //MM-dd-YYYY
+		"end":   "{\\d\\d-\\d\\d-\\d\\d\\d\\d}",   //MM-dd-YYYY
+		"page":  "{[1-9][0-9]*}",
+	}
+	trb.Add("TimeSeriesInBetweenByPage", []string{http.MethodGet}, "/between", paginateByPageQueryParams, res.TimeSeriesFetcherInBetween())
+
+	inBetwQueryParams := map[string]string{
+		"start": fmt.Sprintf("{%s}", datePattern), //MM-dd-YYYY
+		"end":   "{\\d\\d-\\d\\d-\\d\\d\\d\\d}",   //MM-dd-YYYY
+	}
+	trb.Add("TimeSeriesInBetween", []string{http.MethodGet}, "/between", inBetwQueryParams, res.TimeSeriesFetcherInBetween())
+
+	timeSeriesQuery := map[string]string{"date": fmt.Sprintf("{%s}", datePattern)}
+	trb.Add("TimeSeriesByDate", []string{http.MethodGet}, "/select", timeSeriesQuery, res.TimeSeriesFetcherByDate())
+
 }
 
 func addMiddleware(router *mux.Router) http.Handler {
