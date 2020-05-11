@@ -10,13 +10,13 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ParthoShuvo/covid-19-api/cfg"
+	"github.com/ParthoShuvo/covid-19-api/errors"
+	"github.com/ParthoShuvo/covid-19-api/uc/country"
+	"github.com/ParthoShuvo/covid-19-api/uc/cssedaily"
 	"github.com/ParthoShuvo/fpingo/collection/list"
 	"github.com/gocarina/gocsv"
 	log "github.com/sirupsen/logrus"
-	"github.io/covid-19-api/cfg"
-	"github.io/covid-19-api/errors"
-	"github.io/covid-19-api/uc/country"
-	"github.io/covid-19-api/uc/cssedaily"
 )
 
 type (

@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ParthoShuvo/covid-19-api/cfg"
+	"github.com/ParthoShuvo/covid-19-api/errors"
+	countryStore "github.com/ParthoShuvo/covid-19-api/uc/country"
 	"github.com/ParthoShuvo/fpingo/collection/list"
 	fn "github.com/ParthoShuvo/fpingo/util"
 	"github.com/gocarina/gocsv"
-	"github.io/covid-19-api/cfg"
-	"github.io/covid-19-api/errors"
-	countryStore "github.io/covid-19-api/uc/country"
 )
 
 type (

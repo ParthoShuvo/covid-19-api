@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.io/covid-19-api/cfg"
-	"github.io/covid-19-api/errors"
+	"github.com/ParthoShuvo/covid-19-api/cfg"
+	"github.com/ParthoShuvo/covid-19-api/errors"
 )
 
 type DB struct {

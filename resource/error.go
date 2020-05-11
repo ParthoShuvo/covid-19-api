@@ -3,7 +3,7 @@ package resource
 import (
 	"net/http"
 
-	"github.io/covid-19-api/errors"
+	"github.com/ParthoShuvo/covid-19-api/errors"
 )
 
 func SendError(rw http.ResponseWriter, err error) {

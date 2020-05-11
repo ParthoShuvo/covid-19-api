@@ -5,11 +5,11 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/ParthoShuvo/covid-19-api/cfg"
+	"github.com/ParthoShuvo/covid-19-api/errors"
+	"github.com/ParthoShuvo/covid-19-api/uc/cssetimeseries"
 	"github.com/ParthoShuvo/fpingo/collection/list"
 	log "github.com/sirupsen/logrus"
-	"github.io/covid-19-api/cfg"
-	"github.io/covid-19-api/errors"
-	"github.io/covid-19-api/uc/cssetimeseries"
 )
 
 type (

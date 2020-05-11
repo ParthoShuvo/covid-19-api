@@ -3,11 +3,11 @@ package resource
 import (
 	"net/http"
 
+	"github.com/ParthoShuvo/covid-19-api/errors"
+	"github.com/ParthoShuvo/covid-19-api/resource/writer"
+	"github.com/ParthoShuvo/covid-19-api/uc/country"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"github.io/covid-19-api/errors"
-	"github.io/covid-19-api/resource/writer"
-	"github.io/covid-19-api/uc/country"
 )
 
 // CountryResource defines country resources

@@ -5,19 +5,19 @@ import (
 	"net/http"
 	"time"
 
-	"github.io/covid-19-api/middleware"
-	"github.io/covid-19-api/model"
-	"github.io/covid-19-api/resource"
-	"github.io/covid-19-api/resource/writer"
-	"github.io/covid-19-api/route"
-	"github.io/covid-19-api/uc/country"
-	"github.io/covid-19-api/uc/cssedaily"
-	"github.io/covid-19-api/uc/cssetimeseries"
+	"github.com/ParthoShuvo/covid-19-api/middleware"
+	"github.com/ParthoShuvo/covid-19-api/model"
+	"github.com/ParthoShuvo/covid-19-api/resource"
+	"github.com/ParthoShuvo/covid-19-api/resource/writer"
+	"github.com/ParthoShuvo/covid-19-api/route"
+	"github.com/ParthoShuvo/covid-19-api/uc/country"
+	"github.com/ParthoShuvo/covid-19-api/uc/cssedaily"
+	"github.com/ParthoShuvo/covid-19-api/uc/cssetimeseries"
 
+	"github.com/ParthoShuvo/covid-19-api/cfg"
+	"github.com/ParthoShuvo/covid-19-api/log4u"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"github.io/covid-19-api/cfg"
-	"github.io/covid-19-api/log4u"
 )
 
 var config *cfg.Config

@@ -1,6 +1,6 @@
 package cssedaily
 
-import "github.io/covid-19-api/uc"
+import "github.com/ParthoShuvo/covid-19-api/uc"
 
 type Env struct {
 	ds CsseDailyDatastore

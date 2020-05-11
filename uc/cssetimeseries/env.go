@@ -3,8 +3,8 @@ package cssetimeseries
 import (
 	"time"
 
-	"github.io/covid-19-api/errors"
-	"github.io/covid-19-api/uc"
+	"github.com/ParthoShuvo/covid-19-api/errors"
+	"github.com/ParthoShuvo/covid-19-api/uc"
 )
 
 const (

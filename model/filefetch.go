@@ -5,8 +5,8 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/ParthoShuvo/covid-19-api/errors"
 	log "github.com/sirupsen/logrus"
-	"github.io/covid-19-api/errors"
 )
 
 type parser interface {
