@@ -1,0 +1,4 @@
+**/vendor
+*.log
+*.md
+covid-19-api
