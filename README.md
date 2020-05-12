@@ -147,7 +147,6 @@ Visit [issues](https://github.com/ParthoShuvo/covid-19-api/issues) section.
 <table>
   <tr>
     <td align="center"><a href="https://www.linkedin.com/in/parthoshuvo/"><img src="https://avatars3.githubusercontent.com/u/9255705?s=460&u=15a0c89028fcfe11868a679406e90ef94eeeedd9&v=4" width="200px;" alt=""/><br /><sub><b>Shuvojit Saha</b></sub></a><br /><a href="https://github.com/ParthoShuvo/covid-19-api/commits?author=ParthoShuvo" title="Code">💻</a> <a href="#infra-sruti" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/ParthoShuvo/covid-19-api/issues/created_by/ParthoShuvo" title="Bug reports">🐛</a><a href="#ideas-sruti" title="Ideas, Planning, & Feedback">💡</a></td>
-    <td></td>
     </tr>
 </table>
 
