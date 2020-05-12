@@ -109,9 +109,9 @@ Download from [here](https://www.postman.com/downloads/) for your platform and i
 ## Go Packages
 
 - **Logging** [logrus](https://github.com/sirupsen/logrus)
-- **Http Router and URL Matcher** [gorilla/mux](https://github.com/gorilla/mux)
-- **CSV Serializer & Deserializer** [gocsv](https://github.com/gocarina/gocsv)
-- **Functional Programming in Go** [fpingo](https://github.com/ParthoShuvo/fpingo) :construction: (Hope to get some motivation to complete :blush:)
+- **Http Router and URL Matcher**  - [gorilla/mux](https://github.com/gorilla/mux)
+- **CSV Serializer & Deserializer** - [gocsv](https://github.com/gocarina/gocsv)
+- **Functional Programming in Go** - [fpingo](https://github.com/ParthoShuvo/fpingo) :construction: (Hope to get some motivation to complete :blush:)
 
 ## Resources
 - [**Go In Action**](https://www.manning.com/books/go-in-action)
@@ -136,9 +136,9 @@ For major changes, please open an issue first to discuss what you would like to 
 ## Things I hate about Golang
 
 *Following links tell you why I hate*
-- **Go is not good** [https://github.com/ksimka/go-is-not-good]
-- **Go good bad ugly**[https://bluxte.net/musings/2018/04/10/go-good-bad-ugly/]
-- **50 Shades of Go**[http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/]
+- [**Go is not good**](https://github.com/ksimka/go-is-not-good)
+- [**Go good bad ugly**](https://bluxte.net/musings/2018/04/10/go-good-bad-ugly/)
+- [**50 Shades of Go**](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/)
 
 ### Known issues
 Visit [issues](https://github.com/ParthoShuvo/covid-19-api/issues) section.
