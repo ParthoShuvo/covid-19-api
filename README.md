@@ -18,7 +18,7 @@ The COVID 19 API is organized around REST. Provided API has predictable resource
     - [Docker](#docker)
 - [Go Packages](#go-packages)
 - [Resources](#resources)
-- [Improvements](#improvements)
+- [Areas of improvements](#areas-of-improvements)
 - [Contributing](#contributing)
     - [Known Issues](#known-issues)
 - [Things I hate about Golang](#things-i-hate-about-golang)
@@ -120,11 +120,11 @@ Download from [here](https://www.postman.com/downloads/) for your platform and i
 - [**Golang Error Handling — Best Practice**](https://itnext.io/golang-error-handling-best-practice-a36f47b0b94c)
 - [**Awesome Go**](https://awesome-go.com/)
 
-## Improvment
+## Areas of improvements
 *Need to work on following to make code more idiomatic and clean*
 - Apply [**Effective Go Rules**](https://golang.org/doc/effective_go.html)
 - Efficient logging & error handling
-- Dataset reading and searching performance 
+- Improve dataset reading and searching performance 
 - Rest API endpoints design improvement
 - Follow [**Go in Practice**](https://www.manning.com/books/go-in-practice)
 
