@@ -9,7 +9,7 @@
         "Debug": true
     },
     "Server": {
-        "Bind": "shuvojit.go",
+        "Bind": "",
         "Port": 9000
     },
     "Logging": {
