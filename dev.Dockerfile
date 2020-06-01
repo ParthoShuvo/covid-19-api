@@ -13,19 +13,25 @@ RUN go build
 
 # Final stage
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+# Add /bin/bash
+RUN apk add --no-cache bash
 
 ENV APP covid-19-api
 ENV CONFIG covid_19_api.json
 ENV DATA_FOLDER data
 ENV APP_HOME /app
+ENV DATASET_SCRIPT covid-19-dataset.sh
 
 WORKDIR /root/
 COPY --from=builder /app/$APP .
 COPY --from=builder /app/$CONFIG ./$CONFIG
 COPY --from=builder /app/data ./data
+COPY --from=builder /app/$DATASET_SCRIPT ./$DATASET_SCRIPT
+
+# Make dataset downloader script executable
+RUN chmod +x $DATASET_SCRIPT
 
 #PORT
 EXPOSE 9000
 # Start App
-CMD ["./covid-19-api"]
+CMD ["sh", "-c", "./${DATASET_SCRIPT} && ./covid-19-api"]
