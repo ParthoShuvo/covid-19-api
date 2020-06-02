@@ -8,10 +8,6 @@
         "AllowedMethods": ["GET", "OPTIONS"],
         "Debug": true
     },
-    "Server": {
-        "Bind": "",
-        "Port": 9000
-    },
     "Logging": {
         "Filename": "./covid_19_api.log",
         "Level": "DEBUG"

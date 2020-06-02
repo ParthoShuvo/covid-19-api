@@ -4,7 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+
+	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Panic("Failed to load .env file")
+	}
+}
 
 const configFilePath = "covid_19_api.json"
 
@@ -20,9 +30,9 @@ type configData struct {
 	Name        string
 	AllowCORS   bool
 	CORS        *CORSDef `json:"CORS"`
-	Server      *ServerDef
 	Logging     *LogDef
 	Db          *DbDef `json:"Dataset"`
+	Server      *ServerDef
 }
 
 // CORSDef defines allowed cros settings
@@ -36,7 +46,7 @@ type CORSDef struct {
 // ServerDef defines a server address and port.
 type ServerDef struct {
 	Bind string
-	Port int
+	Port string
 }
 
 // LogDef defines logging
@@ -95,7 +105,19 @@ func loadConfig() (*configData, error) {
 		fmt.Println("failed to parse json")
 		return nil, err
 	}
+	configData.Server = loadServerDef()
 	return &configData, nil
+}
+
+func loadServerDef() *ServerDef {
+	const (
+		BIND string = "BIND"
+		PORT string = "PORT"
+	)
+	serverDef := &ServerDef{}
+	serverDef.Bind, _ = os.LookupEnv(BIND)
+	serverDef.Port, _ = os.LookupEnv(PORT)
+	return serverDef
 }
 
 func (cd *configData) appName(version string) string {
@@ -128,7 +150,7 @@ func (c *Config) Server() *ServerDef {
 }
 
 func (s *ServerDef) String() string {
-	return fmt.Sprintf("%s:%d", s.Bind, s.Port)
+	return fmt.Sprintf("%s:%s", s.Bind, s.Port)
 }
 
 // Logging returns logfile and log level
