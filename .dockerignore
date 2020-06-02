@@ -1,5 +1,9 @@
-**/vendor
+vendor
 *.log
 *.md
 covid-19-api
 data/csse_covid_19_data
+README.md
+covid_19_api.log
+.gitignore
+.vscode
