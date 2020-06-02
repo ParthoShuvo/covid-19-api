@@ -18,7 +18,7 @@ import (
 
 func buildRoute(db *model.DB) *mux.Router {
 	rb := route.NewRouteBuilder(config.AllowCORS(), config.AppName(), log4u.ContainsLogDebug(config.Logging().Level))
-	apirb := rb.NewSubrouteBuilder("/covid-19/api")
+	apirb := rb.NewSubrouteBuilder("/api")
 	addCountryRoutes(apirb, db)
 	addCSSERoutes(apirb, db)
 	return rb.Router()
