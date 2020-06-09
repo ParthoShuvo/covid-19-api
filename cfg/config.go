@@ -33,6 +33,13 @@ type configData struct {
 	Logging     *LogDef
 	Db          *DbDef `json:"Dataset"`
 	Server      *ServerDef
+	RedirectURL *RedirectURL `json:"Redirect_URL"`
+}
+
+// RedirectURL defines URLs which are going to redirect for certain request
+type RedirectURL struct {
+	Home string `json:"Home"`
+	API  string `json:"API"`
 }
 
 // CORSDef defines allowed cros settings
@@ -156,4 +163,14 @@ func (s *ServerDef) String() string {
 // Logging returns logfile and log level
 func (c *Config) Logging() LogDef {
 	return *c.configData.Logging
+}
+
+// HomeURL returns redirected home url
+func (c *Config) HomeURL() string {
+	return c.configData.RedirectURL.Home
+}
+
+// APIDocURL returns redirection api documentation url
+func (c *Config) APIDocURL() string {
+	return c.configData.RedirectURL.API
 }

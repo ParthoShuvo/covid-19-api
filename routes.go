@@ -16,9 +16,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var homeRouteHandler http.HandlerFunc = func(rw http.ResponseWriter, r *http.Request) {
+	http.Redirect(rw, r, config.HomeURL(), http.StatusSeeOther)
+}
+
+var apiRouteHandler http.HandlerFunc = func(rw http.ResponseWriter, r *http.Request) {
+	http.Redirect(rw, r, config.APIDocURL(), http.StatusSeeOther)
+}
+
 func buildRoute(db *model.DB) *mux.Router {
+	var emptyQry map[string]string
 	rb := route.NewRouteBuilder(config.AllowCORS(), config.AppName(), log4u.ContainsLogDebug(config.Logging().Level))
+	rb.Add("Home", []string{http.MethodGet, http.MethodHead}, "/", emptyQry, homeRouteHandler)
 	apirb := rb.NewSubrouteBuilder("/api")
+	apirb.Add("APIDoc", []string{http.MethodGet}, "", emptyQry, apiRouteHandler)
 	addCountryRoutes(apirb, db)
 	addCSSERoutes(apirb, db)
 	return rb.Router()

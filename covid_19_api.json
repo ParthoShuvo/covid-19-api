@@ -8,6 +8,10 @@
         "AllowedMethods": ["GET", "OPTIONS"],
         "Debug": true
     },
+    "Redirect_URL": {
+        "Home": "https://github.com/ParthoShuvo/covid-19-api#readme",
+        "API": "https://app.swaggerhub.com/apis-docs/ParthoShuvo/covid-19-api/0.0.1" 
+    },
     "Logging": {
         "Filename": "./covid_19_api.log",
         "Level": "DEBUG"
