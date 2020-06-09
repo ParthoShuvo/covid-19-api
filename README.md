@@ -2,6 +2,8 @@
 
 The COVID 19 API is organized around REST. Provided API has predictable resource-oriented URLs, accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, verbs. The api is driven by the **Covid 19 dataset** from [**Novel Coronavirus (COVID-19) Cases, provided by JHU CSSE**](https://github.com/CSSEGISandData/COVID-19)
 
+**Available here:** [https://research-covid-19.herokuapp.com](https://research-covid-19.herokuapp.com/api) & see [api documentation](#api-documentation)
+
 <!-- Available here:  -->
 
 ***
@@ -11,6 +13,7 @@ The COVID 19 API is organized around REST. Provided API has predictable resource
     - [Golang Installation on Linux](#golang-installation-on-linux)
     - [Golang Installation on Windows](#golang-installation-on-windows)
     - [Postman Installation](#postman-installation)
+- [API Documentation](#api-documentation)
 - [Installation](#installation)
 - [Download Dataset](#download-dataset)
 - [Build and Run](#build-and-run)
@@ -73,6 +76,10 @@ Just go on [official Golang website](https://golang.org/doc/install?download=go1
 #### Postman Installation
 
 Download from [here](https://www.postman.com/downloads/) for your platform and install it.
+
+## API Documentation
+
+See [Swagger](https://app.swaggerhub.com/apis-docs/ParthoShuvo/covid-19-api/0.0.1)
 
 ## Installation
 ```
